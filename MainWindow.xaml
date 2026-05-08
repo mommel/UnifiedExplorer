@@ -95,7 +95,7 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                     <Separator Margin="10,5"/>
-                    <TreeView x:Name="ThisPCTree" BorderThickness="0" Background="Transparent" FontSize="14" SelectedItemChanged="ThisPCTree_SelectedItemChanged">
+                    <TreeView x:Name="ThisPCTree" BorderThickness="0" Background="Transparent" FontSize="14" SelectedItemChanged="ThisPCTree_SelectedItemChanged" TreeViewItem.Expanded="TreeViewItem_Expanded">
                         <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                                 <StackPanel Orientation="Horizontal" Margin="0,4">
