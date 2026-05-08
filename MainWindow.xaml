@@ -230,8 +230,13 @@
                     </ContextMenu>
                 </ListView.ContextMenu>
 
-                <!-- Default GridView mode setup in CodeBehind to handle references easier -->
-            </ListView>
+
+                    <!-- Default GridView mode setup in CodeBehind to handle references easier -->
+                </ListView>
+                <Canvas x:Name="SelectionCanvas" IsHitTestVisible="False">
+                    <Rectangle x:Name="SelectionRectangle" Fill="#330078D7" Stroke="#0078D7" StrokeThickness="1" Visibility="Collapsed" />
+                </Canvas>
+            </Grid>
 
             <GridSplitter Grid.Column="3" Width="5" HorizontalAlignment="Stretch" Background="Transparent" x:Name="PreviewSplitter" Visibility="Collapsed"/>
 
