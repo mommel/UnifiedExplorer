@@ -110,7 +110,7 @@
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="Transparent"/>
 
             <!-- File List -->
-            <ListView x:Name="FileListView" Grid.Column="2" BorderThickness="0" MouseDoubleClick="FileListView_MouseDoubleClick" SelectionChanged="FileListView_SelectionChanged" GridViewColumnHeader.Click="GridViewColumnHeader_Click" PreviewMouseMove="FileListView_PreviewMouseMove" PreviewMouseWheel="FileListView_PreviewMouseWheel">
+            <ListView x:Name="FileListView" Grid.Column="2" BorderThickness="0" MouseDoubleClick="FileListView_MouseDoubleClick" SelectionChanged="FileListView_SelectionChanged" GridViewColumnHeader.Click="GridViewColumnHeader_Click" PreviewMouseMove="FileListView_PreviewMouseMove" PreviewMouseWheel="FileListView_PreviewMouseWheel" IsTextSearchEnabled="False" PreviewTextInput="FileListView_PreviewTextInput">
                 <ListView.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Open" Click="MenuOpen_Click"/>
