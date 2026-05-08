@@ -33,10 +33,6 @@ jobs:
       - name: Publish Windows x64 EXE
         run: dotnet publish $env:PROJECT_PATH --configuration Release --runtime win-x64 --self-contained $env:SELFCONTAINED --output $env:PUBLISH_DIR
 
-      # ---------------------------------------------------------------------------
-      # Code-signing steps — skipped entirely when the certificate secret is absent
-      # ---------------------------------------------------------------------------
-
       - name: Decode signing certificate
         if: ${{ secrets.Base64_Encoded_Pfx != '' }}
         shell: pwsh
@@ -97,20 +93,12 @@ jobs:
             Remove-Item "signing-cert.pfx" -Force
           }
 
-      # ---------------------------------------------------------------------------
-      # Artifact upload — always runs regardless of signing
-      # ---------------------------------------------------------------------------
-
       - name: Upload EXE artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: windows-x64-release
           path: ${{ env.PUBLISH_DIR }}
-
-      # ---------------------------------------------------------------------------
-      # GitHub Release — only on push to main (not on pull requests)
-      # ---------------------------------------------------------------------------
 
       - name: Read project version
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
