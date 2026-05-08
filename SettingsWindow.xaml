@@ -1,0 +1,17 @@
+<Window x:Class="UnifiedExplorer.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Settings" Height="200" Width="300"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{DynamicResource BackgroundColor}"
+        Foreground="{DynamicResource TextColor}">
+    <Grid Margin="15">
+        <StackPanel>
+            <TextBlock Text="Theme Settings" FontSize="16" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource TextColor}"/>
+            
+            <RadioButton x:Name="DarkThemeRadio" Content="Darkmode" Margin="0,5" Checked="ThemeRadio_Checked" Tag="Dark" Foreground="{DynamicResource TextColor}"/>
+            <RadioButton x:Name="LightThemeRadio" Content="Lightmode" Margin="0,5" Checked="ThemeRadio_Checked" Tag="Light" Foreground="{DynamicResource TextColor}"/>
+            <RadioButton x:Name="SystemThemeRadio" Content="Systemsettings" Margin="0,5" Checked="ThemeRadio_Checked" Tag="System" Foreground="{DynamicResource TextColor}"/>
+        </StackPanel>
+    </Grid>
+</Window>
