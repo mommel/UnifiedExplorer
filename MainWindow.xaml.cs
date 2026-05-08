@@ -16,7 +16,7 @@ namespace UnifiedExplorer
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         private double _iconSize = 80;
@@ -33,17 +33,17 @@ namespace UnifiedExplorer
         private string _clipboardPath = "";
         private bool _isCutOperation = false;
         
-        private GridViewColumnHeader _lastHeaderClicked = null;
+        private GridViewColumnHeader? _lastHeaderClicked = null;
         private ListSortDirection _lastDirection = ListSortDirection.Ascending;
         private bool _previewVisible = false;
         private char _lastSearchChar = '\0';
 
-        private GridView _detailsView;
-        private GridViewColumn _colName, _colDateMod, _colType, _colSize, _colCreation, _colDimensions;
+        private GridView _detailsView = null!;
+        private GridViewColumn _colName = null!, _colDateMod = null!, _colType = null!, _colSize = null!, _colCreation = null!, _colDimensions = null!;
         
         // Context Menu Items
-        private MenuItem _menuColSizeFit;
-        private MenuItem _menuColName, _menuColDateMod, _menuColType, _menuColSize, _menuColCreation, _menuColDimensions;
+        private MenuItem _menuColSizeFit = null!;
+        private MenuItem _menuColName = null!, _menuColDateMod = null!, _menuColType = null!, _menuColSize = null!, _menuColCreation = null!, _menuColDimensions = null!;
 
         public MainWindow()
         {
@@ -59,7 +59,7 @@ namespace UnifiedExplorer
             ApplyLocalization();
             SetupDetailsView();
             LoadSidebar();
-            ViewLargeIcons_Click(null, null); // Default to Large Icons view
+            ViewLargeIcons_Click(null!, null!); // Default to Large Icons view
         }
 
         private void SetupContextMenu()
@@ -506,7 +506,7 @@ namespace UnifiedExplorer
         }
 
         // Toolbar / Nav Bar Events
-        private void Up_Click(object sender, RoutedEventArgs e) { if (!string.IsNullOrEmpty(_currentPath)) { DirectoryInfo parent = Directory.GetParent(_currentPath); if (parent != null) LoadDirectory(parent.FullName); } }
+        private void Up_Click(object sender, RoutedEventArgs e) { if (!string.IsNullOrEmpty(_currentPath)) { DirectoryInfo? parent = Directory.GetParent(_currentPath); if (parent != null) LoadDirectory(parent.FullName); } }
         private void Refresh_Click(object sender, RoutedEventArgs e) { LoadDirectory(_currentPath); }
         private void PathTextBox_KeyDown(object sender, KeyEventArgs e) { if (e.Key == Key.Enter) LoadDirectory(PathTextBox.Text); }
         
@@ -542,10 +542,13 @@ namespace UnifiedExplorer
                 ListSortDirection direction = ListSortDirection.Ascending;
                 if (headerClicked == _lastHeaderClicked) direction = _lastDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
 
-                string sortBy = headerClicked.Column.Header as string;
-                Sort(sortBy, direction);
-                _lastHeaderClicked = headerClicked;
-                _lastDirection = direction;
+                string? sortBy = headerClicked.Column.Header as string;
+                if (sortBy != null)
+                {
+                    Sort(sortBy, direction);
+                    _lastHeaderClicked = headerClicked;
+                    _lastDirection = direction;
+                }
             }
         }
 
@@ -594,7 +597,7 @@ namespace UnifiedExplorer
             }
         }
 
-        private void MenuOpen_Click(object sender, RoutedEventArgs e) { FileListView_MouseDoubleClick(null, null); }
+        private void MenuOpen_Click(object sender, RoutedEventArgs e) { FileListView_MouseDoubleClick(null!, null!); }
         private void MenuCut_Click(object sender, RoutedEventArgs e) { if (FileListView.SelectedItem is FileSystemItem item) { _clipboardPath = item.Path; _isCutOperation = true; } }
         private void MenuCopy_Click(object sender, RoutedEventArgs e) { if (FileListView.SelectedItem is FileSystemItem item) { _clipboardPath = item.Path; _isCutOperation = false; } }
         private void MenuPaste_Click(object sender, RoutedEventArgs e)
@@ -683,24 +686,24 @@ namespace UnifiedExplorer
 
     public class FileSystemItem : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        public string Name { get; set; }
-        public string Path { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Path { get; set; } = string.Empty;
         public bool IsDirectory { get; set; }
         public DateTime DateModified { get; set; }
         public string DateModifiedStr => DateModified.ToString("g");
         public DateTime CreationDate { get; set; }
         public string CreationDateStr => CreationDate.ToString("g");
-        public string Type { get; set; }
-        public string Size { get; set; }
+        public string Type { get; set; } = string.Empty;
+        public string Size { get; set; } = string.Empty;
         public long SizeBytes { get; set; }
-        public string Dimensions { get; set; }
-        public string Icon { get; set; }
-        public string IconColor { get; set; }
+        public string Dimensions { get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;
+        public string IconColor { get; set; } = string.Empty;
 
-        private ImageSource _thumbnail;
+        private ImageSource? _thumbnail;
         public ImageSource Thumbnail
         {
             get => _thumbnail;

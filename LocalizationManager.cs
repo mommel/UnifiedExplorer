@@ -55,7 +55,7 @@ namespace UnifiedExplorer
         public static string GetString(string key)
         {
             var dict = IsGerman ? GermanStrings : EnglishStrings;
-            if (dict.TryGetValue(key, out string value))
+            if (dict.TryGetValue(key, out string? value) && value != null)
                 return value;
             return key; // Fallback to key if not found
         }
