@@ -10,11 +10,21 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Threading.Tasks;
 
 namespace UnifiedExplorer
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        private double _iconSize = 80;
+        public double IconSize
+        {
+            get => _iconSize;
+            set { _iconSize = value; OnPropertyChanged(nameof(IconSize)); }
+        }
         private ObservableCollection<FileSystemItem> _currentFiles = new ObservableCollection<FileSystemItem>();
         private ObservableCollection<TreeNode> _favorites = new ObservableCollection<TreeNode>();
         private ObservableCollection<TreeNode> _thisPC = new ObservableCollection<TreeNode>();
@@ -48,6 +58,7 @@ namespace UnifiedExplorer
             ApplyLocalization();
             SetupDetailsView();
             LoadSidebar();
+            ViewLargeIcons_Click(null, null); // Default to Large Icons view
         }
 
         private void SetupContextMenu()
@@ -261,7 +272,7 @@ namespace UnifiedExplorer
                         string ext = file.Extension.ToLower();
                         string dimensions = "";
                         
-                        if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif")
+                        if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp")
                         {
                             try
                             {
@@ -273,7 +284,7 @@ namespace UnifiedExplorer
                             } catch { }
                         }
 
-                        _currentFiles.Add(new FileSystemItem
+                        var newFileItem = new FileSystemItem
                         {
                             Name = file.Name,
                             Path = file.FullName,
@@ -286,7 +297,29 @@ namespace UnifiedExplorer
                             Icon = GetIconForFile(ext),
                             IconColor = "#8A8A8A",
                             Dimensions = dimensions
-                        });
+                        };
+                        _currentFiles.Add(newFileItem);
+
+                        if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp")
+                        {
+                            _ = Task.Run(() =>
+                            {
+                                try
+                                {
+                                    using (var fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                                    {
+                                        var bitmap = new BitmapImage();
+                                        bitmap.BeginInit();
+                                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                                        bitmap.DecodePixelWidth = 300;
+                                        bitmap.StreamSource = fs;
+                                        bitmap.EndInit();
+                                        bitmap.Freeze();
+                                        Dispatcher.InvokeAsync(() => { newFileItem.Thumbnail = bitmap; });
+                                    }
+                                } catch { }
+                            });
+                        }
                     }
                 }
                 
@@ -336,17 +369,34 @@ namespace UnifiedExplorer
             
             var dataTemplate = new DataTemplate();
             var stackPanelFactory = new FrameworkElementFactory(typeof(StackPanel));
-            stackPanelFactory.SetValue(StackPanel.WidthProperty, 100.0);
+            stackPanelFactory.SetBinding(StackPanel.WidthProperty, new System.Windows.Data.Binding("IconSize") { Source = this, Converter = new SizeAdditionConverter(), ConverterParameter = 20.0 });
             stackPanelFactory.SetValue(StackPanel.MarginProperty, new Thickness(5));
             stackPanelFactory.SetValue(StackPanel.BackgroundProperty, Brushes.Transparent);
             
+            var gridFactory = new FrameworkElementFactory(typeof(Grid));
+            gridFactory.SetBinding(Grid.WidthProperty, new System.Windows.Data.Binding("IconSize") { Source = this });
+            gridFactory.SetBinding(Grid.HeightProperty, new System.Windows.Data.Binding("IconSize") { Source = this });
+            gridFactory.SetValue(Grid.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            gridFactory.SetValue(Grid.MarginProperty, new Thickness(0, 0, 0, 5));
+
             var iconFactory = new FrameworkElementFactory(typeof(TextBlock));
             iconFactory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Icon"));
             iconFactory.SetBinding(TextBlock.ForegroundProperty, new System.Windows.Data.Binding("IconColor"));
             iconFactory.SetValue(TextBlock.FontFamilyProperty, FindResource("FluentIcons"));
-            iconFactory.SetValue(TextBlock.FontSizeProperty, 48.0);
+            iconFactory.SetBinding(TextBlock.FontSizeProperty, new System.Windows.Data.Binding("IconSize") { Source = this, Converter = new SizeMultiplierConverter(), ConverterParameter = 0.6 });
             iconFactory.SetValue(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Center);
-            iconFactory.SetValue(TextBlock.MarginProperty, new Thickness(0, 0, 0, 5));
+            iconFactory.SetValue(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center);
+            iconFactory.SetBinding(TextBlock.VisibilityProperty, new System.Windows.Data.Binding("IconVisibility"));
+            
+            var imgFactory = new FrameworkElementFactory(typeof(Image));
+            imgFactory.SetBinding(Image.SourceProperty, new System.Windows.Data.Binding("Thumbnail"));
+            imgFactory.SetValue(Image.StretchProperty, Stretch.Uniform);
+            imgFactory.SetValue(Image.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            imgFactory.SetValue(Image.VerticalAlignmentProperty, VerticalAlignment.Center);
+            imgFactory.SetBinding(Image.VisibilityProperty, new System.Windows.Data.Binding("ThumbnailVisibility"));
+
+            gridFactory.AppendChild(iconFactory);
+            gridFactory.AppendChild(imgFactory);
             
             var textFactory = new FrameworkElementFactory(typeof(TextBlock));
             textFactory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Name"));
@@ -356,7 +406,7 @@ namespace UnifiedExplorer
             textFactory.SetValue(TextBlock.MaxHeightProperty, 40.0);
             textFactory.SetValue(TextBlock.TextTrimmingProperty, TextTrimming.CharacterEllipsis);
 
-            stackPanelFactory.AppendChild(iconFactory);
+            stackPanelFactory.AppendChild(gridFactory);
             stackPanelFactory.AppendChild(textFactory);
             dataTemplate.VisualTree = stackPanelFactory;
             FileListView.ItemTemplate = dataTemplate;
@@ -366,6 +416,18 @@ namespace UnifiedExplorer
             FileListView.ItemsPanel = itemsTemplate;
 
             ScrollViewer.SetHorizontalScrollBarVisibility(FileListView, ScrollBarVisibility.Disabled);
+        }
+
+        private void FileListView_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                e.Handled = true;
+                double newSize = IconSize + (e.Delta > 0 ? 20 : -20);
+                if (newSize < 80) newSize = 80;
+                if (newSize > 300) newSize = 300;
+                IconSize = newSize;
+            }
         }
 
         // Column Context Menu Logic
@@ -580,8 +642,11 @@ namespace UnifiedExplorer
         }
     }
 
-    public class FileSystemItem
+    public class FileSystemItem : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
         public string Name { get; set; }
         public string Path { get; set; }
         public bool IsDirectory { get; set; }
@@ -595,5 +660,41 @@ namespace UnifiedExplorer
         public string Dimensions { get; set; }
         public string Icon { get; set; }
         public string IconColor { get; set; }
+
+        private ImageSource _thumbnail;
+        public ImageSource Thumbnail
+        {
+            get => _thumbnail;
+            set
+            {
+                _thumbnail = value;
+                OnPropertyChanged(nameof(Thumbnail));
+                OnPropertyChanged(nameof(ThumbnailVisibility));
+                OnPropertyChanged(nameof(IconVisibility));
+            }
+        }
+        
+        public Visibility ThumbnailVisibility => Thumbnail != null ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility IconVisibility => Thumbnail == null ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    public class SizeMultiplierConverter : System.Windows.Data.IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value is double val && double.TryParse(parameter?.ToString(), out double mult)) return val * mult;
+            return 48.0;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) => throw new NotImplementedException();
+    }
+
+    public class SizeAdditionConverter : System.Windows.Data.IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value is double v && double.TryParse(parameter?.ToString(), out double add)) return v + add;
+            return 100.0;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) => throw new NotImplementedException();
     }
 }
