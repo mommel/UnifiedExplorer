@@ -36,6 +36,7 @@ namespace UnifiedExplorer
         private GridViewColumnHeader _lastHeaderClicked = null;
         private ListSortDirection _lastDirection = ListSortDirection.Ascending;
         private bool _previewVisible = false;
+        private char _lastSearchChar = '\0';
 
         private GridView _detailsView;
         private GridViewColumn _colName, _colDateMod, _colType, _colSize, _colCreation, _colDimensions;
@@ -241,6 +242,7 @@ namespace UnifiedExplorer
                 _currentFiles.Clear();
                 _currentPath = path;
                 PathTextBox.Text = path;
+                _lastSearchChar = '\0';
 
                 var dirInfo = new DirectoryInfo(path);
 
@@ -427,6 +429,43 @@ namespace UnifiedExplorer
                 if (newSize < 80) newSize = 80;
                 if (newSize > 300) newSize = 300;
                 IconSize = newSize;
+            }
+        }
+
+        private void FileListView_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (string.IsNullOrEmpty(e.Text)) return;
+            
+            char pressedChar = char.ToLower(e.Text[0]);
+            if (!char.IsLetterOrDigit(pressedChar) && !char.IsPunctuation(pressedChar) && !char.IsSymbol(pressedChar)) return;
+
+            if (_currentFiles == null || _currentFiles.Count == 0) return;
+
+            int startIndex = 0;
+            int currentSelectedIndex = FileListView.SelectedIndex;
+
+            if (currentSelectedIndex >= 0)
+            {
+                startIndex = currentSelectedIndex + 1;
+            }
+
+            _lastSearchChar = pressedChar;
+
+            for (int i = 0; i < _currentFiles.Count; i++)
+            {
+                int index = (startIndex + i) % _currentFiles.Count;
+                var item = _currentFiles[index];
+                if (item.Name.StartsWith(pressedChar.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    FileListView.SelectedItem = item;
+                    FileListView.ScrollIntoView(item);
+                    if (FileListView.ItemContainerGenerator.ContainerFromIndex(index) is ListViewItem lvi)
+                    {
+                        lvi.Focus();
+                    }
+                    e.Handled = true;
+                    return;
+                }
             }
         }
 
