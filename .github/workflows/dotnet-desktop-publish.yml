@@ -17,6 +17,7 @@ jobs:
       PROJECT_PATH: ./UnifiedExplorer.csproj
       PUBLISH_DIR: ./publish
       SELFCONTAINED: false
+      BASE64_ENCODED_PFX: ${{ secrets.Base64_Encoded_Pfx }}
 
     steps:
       - name: Checkout repository
@@ -34,14 +35,14 @@ jobs:
         run: dotnet publish $env:PROJECT_PATH --configuration Release --runtime win-x64 --self-contained $env:SELFCONTAINED --output $env:PUBLISH_DIR
 
       - name: Decode signing certificate
-        if: ${{ secrets.Base64_Encoded_Pfx != '' }}
+        if: ${{ env.BASE64_ENCODED_PFX != '' }}
         shell: pwsh
         run: |
           $pfxBytes = [System.Convert]::FromBase64String("${{ secrets.Base64_Encoded_Pfx }}")
           [System.IO.File]::WriteAllBytes("signing-cert.pfx", $pfxBytes)
 
       - name: Find SignTool
-        if: ${{ secrets.Base64_Encoded_Pfx != '' }}
+        if: ${{ env.BASE64_ENCODED_PFX != '' }}
         shell: pwsh
         run: |
           $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" -Recurse -Filter signtool.exe |
@@ -56,7 +57,7 @@ jobs:
           "SIGNTOOL_PATH=$($signtool.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Sign EXE
-        if: ${{ secrets.Base64_Encoded_Pfx != '' }}
+        if: ${{ env.BASE64_ENCODED_PFX != '' }}
         shell: pwsh
         run: |
           $exeFiles = Get-ChildItem $env:PUBLISH_DIR -Filter *.exe -Recurse
@@ -76,7 +77,7 @@ jobs:
           }
 
       - name: Verify signature
-        if: ${{ secrets.Base64_Encoded_Pfx != '' }}
+        if: ${{ env.BASE64_ENCODED_PFX != '' }}
         shell: pwsh
         run: |
           $exeFiles = Get-ChildItem $env:PUBLISH_DIR -Filter *.exe -Recurse
@@ -86,7 +87,7 @@ jobs:
           }
 
       - name: Remove signing certificate
-        if: ${{ always() && secrets.Base64_Encoded_Pfx != '' }}
+        if: ${{ always() && env.BASE64_ENCODED_PFX != '' }}
         shell: pwsh
         run: |
           if (Test-Path "signing-cert.pfx") {
