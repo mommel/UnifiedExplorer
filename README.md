@@ -1,4 +1,5 @@
 # Unified Explorer
+![assets/logo.jpg](assets/logo.jpg)
 
 A native Windows File Explorer clone built in C# (WPF) with a focus on **Unified Sorting**. Unlike the standard Windows File Explorer which always groups folders at the top, Unified Explorer sorts files and folders completely uniformly based on your selected column criteria.
 
