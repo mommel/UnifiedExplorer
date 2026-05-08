@@ -189,7 +189,7 @@ namespace UnifiedExplorer
 
         private void TreeViewItem_Expanded(object sender, RoutedEventArgs e)
         {
-            if (sender is TreeViewItem item && item.DataContext is TreeNode node)
+            if (e.OriginalSource is TreeViewItem item && item.DataContext is TreeNode node)
             {
                 if (node.Children.Count > 0 && node.Children[0].Name == LocalizationManager.GetString("Loading"))
                 {
