@@ -11,6 +11,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
 
 namespace UnifiedExplorer
 {
@@ -60,6 +62,11 @@ namespace UnifiedExplorer
             SetupDetailsView();
             LoadSidebar();
             ViewLargeIcons_Click(null!, null!); // Default to Large Icons view
+            
+            if (VersionMenuItem != null)
+            {
+                VersionMenuItem.Header = $"Version {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}";
+            }
         }
 
         private void SetupContextMenu()
@@ -124,12 +131,12 @@ namespace UnifiedExplorer
             var nameTemplate = new DataTemplate();
             var stackPanelFactory = new FrameworkElementFactory(typeof(StackPanel));
             stackPanelFactory.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
-            var iconFactory = new FrameworkElementFactory(typeof(TextBlock));
-            iconFactory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Icon"));
-            iconFactory.SetBinding(TextBlock.ForegroundProperty, new System.Windows.Data.Binding("IconColor"));
-            iconFactory.SetValue(TextBlock.FontFamilyProperty, FindResource("FluentIcons"));
-            iconFactory.SetValue(TextBlock.MarginProperty, new Thickness(0,0,8,0));
-            iconFactory.SetValue(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center);
+            var iconFactory = new FrameworkElementFactory(typeof(Image));
+            iconFactory.SetBinding(Image.SourceProperty, new System.Windows.Data.Binding("Icon"));
+            iconFactory.SetValue(Image.MarginProperty, new Thickness(0,0,8,0));
+            iconFactory.SetValue(Image.WidthProperty, 16.0);
+            iconFactory.SetValue(Image.HeightProperty, 16.0);
+            iconFactory.SetValue(Image.VerticalAlignmentProperty, VerticalAlignment.Center);
             var textFactory = new FrameworkElementFactory(typeof(TextBlock));
             textFactory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Name"));
             textFactory.SetValue(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center);
@@ -159,32 +166,37 @@ namespace UnifiedExplorer
             _favorites.Clear();
             _thisPC.Clear();
 
-            AddSpecialFolder(_favorites, Environment.SpecialFolder.Desktop, LocalizationManager.GetString("Desktop"), "\xE869");
-            AddSpecialFolder(_favorites, Environment.SpecialFolder.UserProfile, LocalizationManager.GetString("Downloads"), "\xE896", "Downloads");
-            AddSpecialFolder(_favorites, Environment.SpecialFolder.MyDocuments, LocalizationManager.GetString("Documents"), "\xE8A5");
-            AddSpecialFolder(_favorites, Environment.SpecialFolder.MyPictures, LocalizationManager.GetString("Pictures"), "\xE8B9");
-            AddSpecialFolder(_favorites, Environment.SpecialFolder.MyMusic, LocalizationManager.GetString("Music"), "\xE8D6");
-            AddSpecialFolder(_favorites, Environment.SpecialFolder.MyVideos, LocalizationManager.GetString("Videos"), "\xE714");
+            AddSpecialFolder(_favorites, Environment.SpecialFolder.Desktop, LocalizationManager.GetString("Desktop"), "");
+            AddSpecialFolder(_favorites, Environment.SpecialFolder.UserProfile, LocalizationManager.GetString("Downloads"), "Downloads");
+            AddSpecialFolder(_favorites, Environment.SpecialFolder.MyDocuments, LocalizationManager.GetString("Documents"), "");
+            AddSpecialFolder(_favorites, Environment.SpecialFolder.MyPictures, LocalizationManager.GetString("Pictures"), "");
+            AddSpecialFolder(_favorites, Environment.SpecialFolder.MyMusic, LocalizationManager.GetString("Music"), "");
+            AddSpecialFolder(_favorites, Environment.SpecialFolder.MyVideos, LocalizationManager.GetString("Videos"), "");
 
-            var thisPCNode = new TreeNode("This PC", LocalizationManager.GetString("ThisPC"), "\xE8A6", "#808080");
+            var pcIcon = IconExtractor.GetFileIcon(Environment.GetFolderPath(Environment.SpecialFolder.System), true) ?? null;
+            var thisPCNode = new TreeNode("This PC", LocalizationManager.GetString("ThisPC"), pcIcon) { ContentMargin = new Thickness(0, 10, 0, 10) };
             foreach (var drive in DriveInfo.GetDrives())
             {
                 if (drive.IsReady)
                 {
-                    string icon = drive.DriveType == DriveType.CDRom ? "\xE958" : drive.DriveType == DriveType.Network ? "\xE839" : "\xEDA2";
-                    var node = new TreeNode(drive.RootDirectory.FullName, drive.Name, icon, "#808080");
-                    node.Children.Add(new TreeNode("", LocalizationManager.GetString("Loading"), ""));
+                    var driveIcon = IconExtractor.GetFileIcon(drive.RootDirectory.FullName, true);
+                    var node = new TreeNode(drive.RootDirectory.FullName, drive.Name, driveIcon) { ContentMargin = new Thickness(0, 10, 0, 10) };
+                    node.Children.Add(new TreeNode("", LocalizationManager.GetString("Loading"), null));
                     thisPCNode.Children.Add(node);
                 }
             }
             _thisPC.Add(thisPCNode);
         }
 
-        private void AddSpecialFolder(ObservableCollection<TreeNode> collection, Environment.SpecialFolder folder, string name, string icon, string subfolder = "")
+        private void AddSpecialFolder(ObservableCollection<TreeNode> collection, Environment.SpecialFolder folder, string name, string subfolder = "")
         {
             string path = Environment.GetFolderPath(folder);
             if (!string.IsNullOrEmpty(subfolder)) path = Path.Combine(path, subfolder);
-            if (Directory.Exists(path)) collection.Add(new TreeNode(path, name, icon, "#E8A11C"));
+            if (Directory.Exists(path))
+            {
+                var icon = IconExtractor.GetFileIcon(path, true);
+                collection.Add(new TreeNode(path, name, icon));
+            }
         }
 
         private void TreeViewItem_Expanded(object sender, RoutedEventArgs e)
@@ -201,8 +213,9 @@ namespace UnifiedExplorer
                             var info = new DirectoryInfo(dir);
                             if (!info.Attributes.HasFlag(FileAttributes.Hidden))
                             {
-                                var subNode = new TreeNode(dir, info.Name, "\xE8B7", "#E8A11C");
-                                subNode.Children.Add(new TreeNode("", LocalizationManager.GetString("Loading"), ""));
+                                var icon = IconExtractor.GetFileIcon(dir, true);
+                                var subNode = new TreeNode(dir, info.Name, icon) { ContentMargin = new Thickness(0, 8, 0, 8) };
+                                subNode.Children.Add(new TreeNode("", LocalizationManager.GetString("Loading"), null));
                                 node.Children.Add(subNode);
                             }
                         }
@@ -260,8 +273,8 @@ namespace UnifiedExplorer
                             Type = LocalizationManager.GetString("FileFolder"),
                             Size = "",
                             SizeBytes = 0,
-                            Icon = "\xE8B7",
-                            IconColor = "#E8A11C",
+                            Icon = IconExtractor.GetFileIcon(dir.FullName, true),
+                            IconColor = "#FFD767",
                             Dimensions = ""
                         });
                     }
@@ -296,7 +309,7 @@ namespace UnifiedExplorer
                             Type = file.Extension + " File",
                             Size = FormatSize(file.Length),
                             SizeBytes = file.Length,
-                            Icon = GetIconForFile(ext),
+                            Icon = IconExtractor.GetFileIcon(file.FullName, false),
                             IconColor = "#8A8A8A",
                             Dimensions = dimensions
                         };
@@ -317,9 +330,18 @@ namespace UnifiedExplorer
                                         bitmap.StreamSource = fs;
                                         bitmap.EndInit();
                                         bitmap.Freeze();
-                                        Dispatcher.InvokeAsync(() => { newFileItem.Thumbnail = bitmap; });
+                                        Dispatcher.InvokeAsync(() => { 
+                                            newFileItem.Thumbnail = bitmap; 
+                                        });
                                     }
                                 } catch { }
+                            });
+                        }
+                        else
+                        {
+                            _ = Task.Run(() => {
+                                var largeIcon = IconExtractor.GetFileIcon(file.FullName, false, true);
+                                if (largeIcon != null) Dispatcher.InvokeAsync(() => { newFileItem.Thumbnail = largeIcon; });
                             });
                         }
                     }
@@ -331,19 +353,7 @@ namespace UnifiedExplorer
             catch (Exception ex) { MessageBox.Show(ex.Message, "Error"); }
         }
 
-        private string GetIconForFile(string ext)
-        {
-            switch (ext)
-            {
-                case ".txt": return "\xE8D5";
-                case ".jpg": case ".png": case ".jpeg": case ".gif": return "\xE8B9";
-                case ".mp4": case ".avi": case ".mkv": return "\xE714";
-                case ".mp3": case ".wav": return "\xE8D6";
-                case ".zip": case ".rar": case ".7z": return "\xE8A5";
-                case ".exe": return "\xE8A5";
-                default: return "\xE8A5";
-            }
-        }
+
 
         private string FormatSize(long bytes)
         {
@@ -381,14 +391,11 @@ namespace UnifiedExplorer
             gridFactory.SetValue(Grid.HorizontalAlignmentProperty, HorizontalAlignment.Center);
             gridFactory.SetValue(Grid.MarginProperty, new Thickness(0, 0, 0, 5));
 
-            var iconFactory = new FrameworkElementFactory(typeof(TextBlock));
-            iconFactory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Icon"));
-            iconFactory.SetBinding(TextBlock.ForegroundProperty, new System.Windows.Data.Binding("IconColor"));
-            iconFactory.SetValue(TextBlock.FontFamilyProperty, FindResource("FluentIcons"));
-            iconFactory.SetBinding(TextBlock.FontSizeProperty, new System.Windows.Data.Binding("IconSize") { Source = this, Converter = new SizeMultiplierConverter(), ConverterParameter = 0.6 });
-            iconFactory.SetValue(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Center);
-            iconFactory.SetValue(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center);
-            iconFactory.SetBinding(TextBlock.VisibilityProperty, new System.Windows.Data.Binding("IconVisibility"));
+            var iconFactory = new FrameworkElementFactory(typeof(Image));
+            iconFactory.SetBinding(Image.SourceProperty, new System.Windows.Data.Binding("Icon"));
+            iconFactory.SetValue(Image.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            iconFactory.SetValue(Image.VerticalAlignmentProperty, VerticalAlignment.Center);
+            iconFactory.SetBinding(Image.VisibilityProperty, new System.Windows.Data.Binding("IconVisibility"));
             
             var imgFactory = new FrameworkElementFactory(typeof(Image));
             imgFactory.SetBinding(Image.SourceProperty, new System.Windows.Data.Binding("Thumbnail"));
@@ -584,7 +591,10 @@ namespace UnifiedExplorer
             {
                 string path = (string)e.Data.GetData(DataFormats.StringFormat);
                 if (Directory.Exists(path) && !_favorites.Any(f => f.Path == path))
-                    _favorites.Add(new TreeNode(path, new DirectoryInfo(path).Name, "\xE8B7", "#E8A11C"));
+                {
+                    var icon = IconExtractor.GetFileIcon(path, true);
+                    _favorites.Add(new TreeNode(path, new DirectoryInfo(path).Name, icon));
+                }
             }
         }
 
@@ -652,6 +662,23 @@ namespace UnifiedExplorer
                 catch (Exception ex) { MessageBox.Show(ex.Message, "Error"); }
             }
         }
+
+        private void MenuOptions_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button != null && button.ContextMenu != null)
+            {
+                button.ContextMenu.PlacementTarget = button;
+                button.ContextMenu.IsOpen = true;
+            }
+        }
+
+        private void SettingsMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var settingsWindow = new SettingsWindow();
+            settingsWindow.Owner = this;
+            settingsWindow.ShowDialog();
+        }
     }
 
     public static class InputBox
@@ -675,10 +702,11 @@ namespace UnifiedExplorer
     {
         public string Path { get; set; }
         public string Name { get; set; }
-        public string Icon { get; set; }
+        public ImageSource? Icon { get; set; }
         public string IconColor { get; set; }
+        public Thickness ContentMargin { get; set; } = new Thickness(0, 8, 0, 8);
         public ObservableCollection<TreeNode> Children { get; set; }
-        public TreeNode(string path, string name, string icon = "\xE8B7", string iconColor = "#E8A11C")
+        public TreeNode(string path, string name, ImageSource? icon = null, string iconColor = "#FFD767")
         {
             Path = path; Name = name; Icon = icon; IconColor = iconColor; Children = new ObservableCollection<TreeNode>();
         }
@@ -700,7 +728,7 @@ namespace UnifiedExplorer
         public string Size { get; set; } = string.Empty;
         public long SizeBytes { get; set; }
         public string Dimensions { get; set; } = string.Empty;
-        public string Icon { get; set; } = string.Empty;
+        public ImageSource? Icon { get; set; }
         public string IconColor { get; set; } = string.Empty;
 
         private ImageSource? _thumbnail;
@@ -738,5 +766,62 @@ namespace UnifiedExplorer
             return 100.0;
         }
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) => throw new NotImplementedException();
+    }
+
+    public static class IconExtractor
+    {
+        [DllImport("shell32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr SHGetFileInfo(string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbFileInfo, uint uFlags);
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        private struct SHFILEINFO
+        {
+            public IntPtr hIcon;
+            public int iIcon;
+            public uint dwAttributes;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            public string szDisplayName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 80)]
+            public string szTypeName;
+        }
+
+        private const uint SHGFI_ICON = 0x000000100;
+        private const uint SHGFI_LARGEICON = 0x000000000;
+        private const uint SHGFI_SMALLICON = 0x000000001;
+        private const uint SHGFI_USEFILEATTRIBUTES = 0x000000010;
+        private const uint FILE_ATTRIBUTE_NORMAL = 0x00000080;
+        private const uint FILE_ATTRIBUTE_DIRECTORY = 0x00000010;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool DestroyIcon(IntPtr hIcon);
+
+        public static ImageSource? GetFileIcon(string path, bool isDirectory, bool largeIcon = false)
+        {
+            uint flags = SHGFI_ICON | SHGFI_USEFILEATTRIBUTES;
+            flags |= largeIcon ? SHGFI_LARGEICON : SHGFI_SMALLICON;
+            uint attrs = isDirectory ? FILE_ATTRIBUTE_DIRECTORY : FILE_ATTRIBUTE_NORMAL;
+
+            SHFILEINFO shinfo = new SHFILEINFO();
+            IntPtr res = SHGetFileInfo(path, attrs, ref shinfo, (uint)Marshal.SizeOf(shinfo), flags);
+
+            if (res != IntPtr.Zero && shinfo.hIcon != IntPtr.Zero)
+            {
+                try
+                {
+                    var img = Imaging.CreateBitmapSourceFromHIcon(
+                        shinfo.hIcon,
+                        Int32Rect.Empty,
+                        BitmapSizeOptions.FromEmptyOptions());
+                    img.Freeze();
+                    return img;
+                }
+                finally
+                {
+                    DestroyIcon(shinfo.hIcon);
+                }
+            }
+            return null;
+        }
     }
 }

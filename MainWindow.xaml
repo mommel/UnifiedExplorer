@@ -3,7 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Name="root"
         Title="Unified Explorer" Height="700" Width="1200" Loaded="Window_Loaded"
-        Icon="pack://application:,,,/assets/app.ico">
+        Icon="pack://application:,,,/assets/app.ico"
+        Background="{DynamicResource BackgroundColor}"
+        Foreground="{DynamicResource TextColor}">
     
     <Window.Resources>
         <FontFamily x:Key="FluentIcons">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
@@ -26,19 +28,34 @@
         </Grid.RowDefinitions>
         
         <!-- Row 0: Command Bar -->
-        <ToolBarTray Grid.Row="0" Background="Transparent" IsLocked="True">
-            <ToolBar Background="Transparent" Band="1" BandIndex="1" Margin="0,5">
-                <Button Style="{StaticResource IconButton}" Content="&#xECC8;" ToolTip="New" Click="MenuNewFolder_Click"/>
-                <Separator/>
-                <Button Style="{StaticResource IconButton}" Content="&#xE8C6;" ToolTip="Cut" Click="MenuCut_Click"/>
-                <Button Style="{StaticResource IconButton}" Content="&#xE8C8;" ToolTip="Copy" Click="MenuCopy_Click"/>
-                <Button Style="{StaticResource IconButton}" Content="&#xE77F;" ToolTip="Paste" Click="MenuPaste_Click"/>
-                <Button Style="{StaticResource IconButton}" Content="&#xE8AC;" ToolTip="Rename" Click="MenuRename_Click"/>
-                <Button Style="{StaticResource IconButton}" Content="&#xE74D;" ToolTip="Delete" Click="MenuDelete_Click"/>
-                <Separator/>
-                <Button Style="{StaticResource IconButton}" Content="&#xEA37;" ToolTip="Toggle Preview" Click="TogglePreview_Click" HorizontalAlignment="Right"/>
-            </ToolBar>
-        </ToolBarTray>
+        <Border Grid.Row="0" Background="{DynamicResource MenuBarColor}">
+            <Grid Margin="0,5">
+                <StackPanel Orientation="Horizontal">
+                    <Button Style="{StaticResource IconButton}" Content="&#xECC8;" ToolTip="New" Click="MenuNewFolder_Click" Foreground="{DynamicResource TextColor}"/>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+                    <Button Style="{StaticResource IconButton}" Content="&#xE8C6;" ToolTip="Cut" Click="MenuCut_Click" Foreground="{DynamicResource TextColor}"/>
+                    <Button Style="{StaticResource IconButton}" Content="&#xE8C8;" ToolTip="Copy" Click="MenuCopy_Click" Foreground="{DynamicResource TextColor}"/>
+                    <Button Style="{StaticResource IconButton}" Content="&#xE77F;" ToolTip="Paste" Click="MenuPaste_Click" Foreground="{DynamicResource TextColor}"/>
+                    <Button Style="{StaticResource IconButton}" Content="&#xE8AC;" ToolTip="Rename" Click="MenuRename_Click" Foreground="{DynamicResource TextColor}"/>
+                    <Button Style="{StaticResource IconButton}" Content="&#xE74D;" ToolTip="Delete" Click="MenuDelete_Click" Foreground="{DynamicResource TextColor}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource IconButton}" Content="&#xEA37;" ToolTip="Toggle Preview" Click="TogglePreview_Click" Foreground="{DynamicResource TextColor}"/>
+                    <Button Style="{StaticResource IconButton}" Content="&#xE712;" ToolTip="Options" Click="MenuOptions_Click" Foreground="{DynamicResource TextColor}">
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Options/Einstellungen" Click="SettingsMenuItem_Click"/>
+                                <MenuItem Header="Version" IsEnabled="False" x:Name="VersionMenuItem">
+                                    <MenuItem.Icon>
+                                        <Image Source="pack://application:,,,/assets/app.ico" Width="16" Height="16"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
 
         <!-- Row 1: Nav Bar -->
         <Grid Grid.Row="1" Margin="5">
@@ -49,14 +66,14 @@
             </Grid.ColumnDefinitions>
             
             <StackPanel Orientation="Horizontal" Grid.Column="0">
-                <Button Style="{StaticResource IconButton}" Content="&#xE72B;" ToolTip="Back"/>
-                <Button Style="{StaticResource IconButton}" Content="&#xE72A;" ToolTip="Forward"/>
-                <Button Style="{StaticResource IconButton}" Content="&#xE197;" ToolTip="Up" Click="Up_Click"/>
-                <Button Style="{StaticResource IconButton}" Content="&#xE72C;" ToolTip="Refresh" Click="Refresh_Click"/>
+                <Button Style="{StaticResource IconButton}" Content="&#xE72B;" ToolTip="Back" Foreground="{DynamicResource TextColor}"/>
+                <Button Style="{StaticResource IconButton}" Content="&#xE72A;" ToolTip="Forward" Foreground="{DynamicResource TextColor}"/>
+                <Button Style="{StaticResource IconButton}" Content="&#xE197;" ToolTip="Up" Click="Up_Click" Foreground="{DynamicResource TextColor}"/>
+                <Button Style="{StaticResource IconButton}" Content="&#xE72C;" ToolTip="Refresh" Click="Refresh_Click" Foreground="{DynamicResource TextColor}"/>
             </StackPanel>
 
-            <TextBox x:Name="PathTextBox" Grid.Column="1" Margin="10,0" VerticalContentAlignment="Center" KeyDown="PathTextBox_KeyDown"/>
-            <TextBox x:Name="SearchTextBox" Grid.Column="2" Margin="0,0,5,0" VerticalContentAlignment="Center" Text="Search..." Foreground="Gray" GotFocus="SearchTextBox_GotFocus" LostFocus="SearchTextBox_LostFocus"/>
+            <TextBox x:Name="PathTextBox" Grid.Column="1" Margin="10,0" Padding="21,10,0,10" VerticalContentAlignment="Center" KeyDown="PathTextBox_KeyDown" Background="{DynamicResource BackgroundColor}" Foreground="{DynamicResource TextColor}"/>
+            <TextBox x:Name="SearchTextBox" Grid.Column="2" Margin="0,0,5,0" VerticalContentAlignment="Center" Text="Search..." Foreground="{DynamicResource TextColor}" Background="{DynamicResource BackgroundColor}" GotFocus="SearchTextBox_GotFocus" LostFocus="SearchTextBox_LostFocus"/>
         </Grid>
 
         <!-- Row 2: Main Area -->
@@ -77,6 +94,23 @@
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                                 <Setter Property="Padding" Value="5,4"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="Bd" Background="Transparent" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectColor}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectedColor}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
                             </Style>
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
@@ -87,20 +121,47 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" FontFamily="{StaticResource FluentIcons}" Text="{Binding Icon}" Margin="0,0,10,0" Foreground="{Binding IconColor}" VerticalAlignment="Center" FontSize="16"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                                    <Button Grid.Column="2" Style="{StaticResource IconButton}" Content="&#xE840;" FontSize="12" Foreground="#808080" ToolTip="Unpin" Click="Unpin_Click" Tag="{Binding}"/>
+                                    <Image Grid.Column="0" Source="{Binding Icon}" Margin="24,8,10,8" Width="16" Height="16" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextColor}"/>
+                                    <Button Grid.Column="2" Style="{StaticResource IconButton}" Content="📌" FontFamily="Segoe UI Emoji" FontSize="12" Foreground="#808080" ToolTip="Unpin" Click="Unpin_Click" Tag="{Binding}"/>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <Separator Margin="10,5"/>
-                    <TreeView x:Name="ThisPCTree" BorderThickness="0" Background="Transparent" FontSize="14" SelectedItemChanged="ThisPCTree_SelectedItemChanged" TreeViewItem.Expanded="TreeViewItem_Expanded">
+                    <Separator Margin="10,21"/>
+                    <TreeView x:Name="ThisPCTree" BorderThickness="0" Background="Transparent" FontSize="14" Margin="21,0,0,0" SelectedItemChanged="ThisPCTree_SelectedItemChanged" TreeViewItem.Expanded="TreeViewItem_Expanded">
+                        <TreeView.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black" />
+                            <Style TargetType="ToggleButton">
+                                <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.5" ScaleY="1.5"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </TreeView.Resources>
+                        <TreeView.ItemContainerStyle>
+                            <Style TargetType="TreeViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource SelectColor}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource SelectedColor}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TreeView.ItemContainerStyle>
                         <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                                <StackPanel Orientation="Horizontal" Margin="0,4">
-                                    <TextBlock FontFamily="{StaticResource FluentIcons}" Text="{Binding Icon}" Margin="0,0,10,0" Foreground="{Binding IconColor}" VerticalAlignment="Center" FontSize="16"/>
-                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                <StackPanel Orientation="Horizontal" Margin="{Binding ContentMargin}">
+                                    <Image Source="{Binding Icon}" Margin="20,0,10,0" Width="16" Height="16" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Foreground="{DynamicResource TextColor}"/>
                                 </StackPanel>
                             </HierarchicalDataTemplate>
                         </TreeView.ItemTemplate>
@@ -111,7 +172,51 @@
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="Transparent"/>
 
             <!-- File List -->
-            <ListView x:Name="FileListView" Grid.Column="2" BorderThickness="0" MouseDoubleClick="FileListView_MouseDoubleClick" SelectionChanged="FileListView_SelectionChanged" GridViewColumnHeader.Click="GridViewColumnHeader_Click" PreviewMouseMove="FileListView_PreviewMouseMove" PreviewMouseWheel="FileListView_PreviewMouseWheel" IsTextSearchEnabled="False" PreviewTextInput="FileListView_PreviewTextInput">
+            <ListView x:Name="FileListView" Grid.Column="2" BorderThickness="0" Background="{DynamicResource BackgroundColor}" Foreground="{DynamicResource TextColor}" MouseDoubleClick="FileListView_MouseDoubleClick" SelectionChanged="FileListView_SelectionChanged" GridViewColumnHeader.Click="GridViewColumnHeader_Click" PreviewMouseMove="FileListView_PreviewMouseMove" PreviewMouseWheel="FileListView_PreviewMouseWheel" IsTextSearchEnabled="False" PreviewTextInput="FileListView_PreviewTextInput">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Padding" Value="2"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListViewItem">
+                                    <Border x:Name="Bd" Background="Transparent" Padding="{TemplateBinding Padding}">
+                                        <GridViewRowPresenter Content="{TemplateBinding Content}" Columns="{Binding Path=View.Columns, RelativeSource={RelativeSource AncestorType=ListView}}"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectColor}"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectedColor}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=View}" Value="{x:Null}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListViewItem">
+                                            <Border x:Name="Bd" Background="Transparent" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectColor}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectedColor}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
                 <ListView.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Open" Click="MenuOpen_Click"/>
@@ -131,7 +236,7 @@
             <GridSplitter Grid.Column="3" Width="5" HorizontalAlignment="Stretch" Background="Transparent" x:Name="PreviewSplitter" Visibility="Collapsed"/>
 
             <!-- Preview Panel -->
-            <Border Grid.Column="4" Background="#F3F3F3" BorderBrush="#E5E5E5" BorderThickness="1,0,0,0" x:Name="PreviewPanelBorder" Visibility="Collapsed">
+            <Border Grid.Column="4" Background="{DynamicResource BackgroundColor}" BorderBrush="{DynamicResource MenuBarColor}" BorderThickness="1,0,0,0" x:Name="PreviewPanelBorder" Visibility="Collapsed">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="20">
                         <Grid Margin="0,20">
@@ -152,12 +257,12 @@
         </Grid>
 
         <!-- Status Bar -->
-        <StatusBar Grid.Row="3" Background="#F3F3F3" Padding="5,0">
-            <StatusBarItem x:Name="ItemCountLbl" Content="0 items"/>
+        <StatusBar Grid.Row="3" Background="{DynamicResource BottomBarColor}" Padding="5,0">
+            <StatusBarItem x:Name="ItemCountLbl" Content="0 items" Foreground="{DynamicResource TextColor}"/>
             <StatusBarItem HorizontalAlignment="Right">
                 <StackPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource IconButton}" Content="&#xE14C;" ToolTip="Details View" Click="ViewDetails_Click"/>
-                    <Button Style="{StaticResource IconButton}" Content="&#xE154;" ToolTip="Large Icons View" Click="ViewLargeIcons_Click"/>
+                    <Button Style="{StaticResource IconButton}" Content="&#xE14C;" ToolTip="Details View" Click="ViewDetails_Click" Foreground="{DynamicResource TextColor}"/>
+                    <Button Style="{StaticResource IconButton}" Content="&#xE154;" ToolTip="Large Icons View" Click="ViewLargeIcons_Click" Foreground="{DynamicResource TextColor}"/>
                 </StackPanel>
             </StatusBarItem>
         </StatusBar>

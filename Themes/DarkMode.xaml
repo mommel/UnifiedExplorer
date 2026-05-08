@@ -1,0 +1,11 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="BackgroundColor" Color="#191919"/>
+    <SolidColorBrush x:Key="MenuBarColor" Color="#2c2c2c"/>
+    <SolidColorBrush x:Key="TextColor" Color="#98e7e5e5"/> <!-- e7e5e598 wait, ARGB in WPF is #AARRGGBB, issue has #e7e5e598, so A=98, R=e7, G=e5, B=e5 -->
+    <SolidColorBrush x:Key="SelectColor" Color="#272727"/>
+    <SolidColorBrush x:Key="SelectedColor" Color="#b68989"/>
+    <SolidColorBrush x:Key="FolderColor" Color="#ffd767"/>
+    <SolidColorBrush x:Key="FolderStringColor" Color="#2b2c31"/>
+    <SolidColorBrush x:Key="BottomBarColor" Color="#4a4a4a"/>
+</ResourceDictionary>
