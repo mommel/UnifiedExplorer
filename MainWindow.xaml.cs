@@ -39,6 +39,22 @@ namespace UnifiedExplorer
         private ListSortDirection _lastDirection = ListSortDirection.Ascending;
         private bool _previewVisible = false;
         private char _lastSearchChar = '\0';
+        
+        private Point _startPoint;
+        private bool _isSelecting = false;
+        private ScrollViewer? _listScrollViewer;
+
+        private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild) return typedChild;
+                var childOfChild = FindVisualChild<T>(child);
+                if (childOfChild != null) return childOfChild;
+            }
+            return null;
+        }
 
         private GridView _detailsView = null!;
         private GridViewColumn _colName = null!, _colDateMod = null!, _colType = null!, _colSize = null!, _colCreation = null!, _colDimensions = null!;
@@ -579,10 +595,110 @@ namespace UnifiedExplorer
         }
 
         // Drag Drop & Context Logic
+        private void FileListView_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.OriginalSource is DependencyObject depObj)
+            {
+                // Check if user clicked on a ListViewItem
+                var item = FindVisualParent<ListViewItem>(depObj);
+                if (item == null)
+                {
+                    // Clicked on empty space
+                    _startPoint = e.GetPosition(SelectionCanvas);
+                    FileListView.SelectedItems.Clear();
+                    _isSelecting = true;
+                    FileListView.CaptureMouse();
+                    
+                    Canvas.SetLeft(SelectionRectangle, _startPoint.X);
+                    Canvas.SetTop(SelectionRectangle, _startPoint.Y);
+                    SelectionRectangle.Width = 0;
+                    SelectionRectangle.Height = 0;
+                    SelectionRectangle.Visibility = Visibility.Visible;
+                    
+                    if (_listScrollViewer == null)
+                        _listScrollViewer = FindVisualChild<ScrollViewer>(FileListView);
+                }
+            }
+        }
+
+        private static T? FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            DependencyObject parentObject = child;
+            while (parentObject != null)
+            {
+                if (parentObject is Visual || parentObject is System.Windows.Media.Media3D.Visual3D)
+                {
+                    parentObject = VisualTreeHelper.GetParent(parentObject);
+                }
+                else
+                {
+                    parentObject = LogicalTreeHelper.GetParent(parentObject);
+                }
+                
+                if (parentObject is T parent) return parent;
+            }
+            return null;
+        }
+
         private void FileListView_PreviewMouseMove(object sender, MouseEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed && FileListView.SelectedItem is FileSystemItem item && item.IsDirectory)
+            if (_isSelecting && e.LeftButton == MouseButtonState.Pressed)
+            {
+                Point pos = e.GetPosition(SelectionCanvas);
+                
+                double x = Math.Min(pos.X, _startPoint.X);
+                double y = Math.Min(pos.Y, _startPoint.Y);
+                double w = Math.Abs(pos.X - _startPoint.X);
+                double h = Math.Abs(pos.Y - _startPoint.Y);
+                
+                Canvas.SetLeft(SelectionRectangle, x);
+                Canvas.SetTop(SelectionRectangle, y);
+                SelectionRectangle.Width = w;
+                SelectionRectangle.Height = h;
+                
+                Rect selectionRect = new Rect(x, y, w, h);
+                
+                // Select items intersecting with rectangle
+                foreach (var item in FileListView.Items)
+                {
+                    if (FileListView.ItemContainerGenerator.ContainerFromItem(item) is ListViewItem lvi)
+                    {
+                        Point itemPos = lvi.TransformToVisual(SelectionCanvas).Transform(new Point(0, 0));
+                        Rect itemRect = new Rect(itemPos, new Size(lvi.ActualWidth, lvi.ActualHeight));
+                        
+                        if (selectionRect.IntersectsWith(itemRect))
+                            lvi.IsSelected = true;
+                        else
+                            lvi.IsSelected = false;
+                    }
+                }
+                
+                // Auto-scroll logic
+                if (_listScrollViewer != null)
+                {
+                    Point listViewPos = e.GetPosition(FileListView);
+                    double scrollZoneHeight = 20;
+                    
+                    if (listViewPos.Y < scrollZoneHeight)
+                        _listScrollViewer.LineUp();
+                    else if (listViewPos.Y > FileListView.ActualHeight - scrollZoneHeight)
+                        _listScrollViewer.LineDown();
+                }
+            }
+            else if (!_isSelecting && e.LeftButton == MouseButtonState.Pressed && FileListView.SelectedItem is FileSystemItem item && item.IsDirectory)
+            {
                 DragDrop.DoDragDrop(FileListView, item.Path, DragDropEffects.Link);
+            }
+        }
+
+        private void FileListView_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isSelecting)
+            {
+                _isSelecting = false;
+                FileListView.ReleaseMouseCapture();
+                SelectionRectangle.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void FavoritesList_Drop(object sender, DragEventArgs e)

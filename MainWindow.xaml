@@ -169,10 +169,12 @@
                 </StackPanel>
             </ScrollViewer>
 
+            <Rectangle Grid.Column="1" Width="2" Fill="{DynamicResource FolderStringColor}" HorizontalAlignment="Center" IsHitTestVisible="False"/>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="Transparent"/>
 
             <!-- File List -->
-            <ListView x:Name="FileListView" Grid.Column="2" BorderThickness="0" Background="{DynamicResource BackgroundColor}" Foreground="{DynamicResource TextColor}" MouseDoubleClick="FileListView_MouseDoubleClick" SelectionChanged="FileListView_SelectionChanged" GridViewColumnHeader.Click="GridViewColumnHeader_Click" PreviewMouseMove="FileListView_PreviewMouseMove" PreviewMouseWheel="FileListView_PreviewMouseWheel" IsTextSearchEnabled="False" PreviewTextInput="FileListView_PreviewTextInput">
+            <Grid Grid.Column="2">
+                <ListView x:Name="FileListView" BorderThickness="0" Background="{DynamicResource BackgroundColor}" Foreground="{DynamicResource TextColor}" MouseDoubleClick="FileListView_MouseDoubleClick" SelectionChanged="FileListView_SelectionChanged" GridViewColumnHeader.Click="GridViewColumnHeader_Click" PreviewMouseMove="FileListView_PreviewMouseMove" PreviewMouseWheel="FileListView_PreviewMouseWheel" IsTextSearchEnabled="False" PreviewTextInput="FileListView_PreviewTextInput" PreviewMouseLeftButtonDown="FileListView_PreviewMouseLeftButtonDown" PreviewMouseLeftButtonUp="FileListView_PreviewMouseLeftButtonUp">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -230,9 +232,15 @@
                     </ContextMenu>
                 </ListView.ContextMenu>
 
-                <!-- Default GridView mode setup in CodeBehind to handle references easier -->
-            </ListView>
 
+                    <!-- Default GridView mode setup in CodeBehind to handle references easier -->
+                </ListView>
+                <Canvas x:Name="SelectionCanvas" IsHitTestVisible="False">
+                    <Rectangle x:Name="SelectionRectangle" Fill="#330078D7" Stroke="#0078D7" StrokeThickness="1" Visibility="Collapsed" />
+                </Canvas>
+            </Grid>
+
+            <Rectangle Grid.Column="3" Width="2" Fill="{DynamicResource FolderStringColor}" HorizontalAlignment="Center" IsHitTestVisible="False" Visibility="{Binding Visibility, ElementName=PreviewSplitter}"/>
             <GridSplitter Grid.Column="3" Width="5" HorizontalAlignment="Stretch" Background="Transparent" x:Name="PreviewSplitter" Visibility="Collapsed"/>
 
             <!-- Preview Panel -->
