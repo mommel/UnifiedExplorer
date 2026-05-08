@@ -1,5 +1,7 @@
 # Unified Explorer
 ![assets/logo.jpg](assets/logo.jpg)
+[![.NET Desktop Publish](https://github.com/mommel/UnifiedExplorer/actions/workflows/dotnet-desktop-publish.yml/badge.svg)](https://github.com/mommel/UnifiedExplorer/actions/workflows/dotnet-desktop-publish.yml)
+
 
 The native Windows File Explorer has lacks the option to have a correct sorting, so that files and directories get sorted correctly. The windows file explorer sorts so that files are sorted and directories are sorted and they will never be mixed.
 That's why this app built in C# (WPF) with a focus on **Unified Sorting** got alive. Unified Explorer sorts files and folders completely uniformly based on your selected column criteria. That's it.
