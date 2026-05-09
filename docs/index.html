@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;family=Geist:wght@400;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#4f2500",
+                        "on-surface-variant": "#c7c4d7",
+                        "surface-variant": "#34343d",
+                        "primary-container": "#8083ff",
+                        "inverse-primary": "#494bd6",
+                        "tertiary": "#ffb783",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#301400",
+                        "tertiary-fixed": "#ffdcc5",
+                        "secondary-fixed": "#acedff",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "on-tertiary-container": "#452000",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "tertiary-container": "#d97721",
+                        "secondary-container": "#03b5d3",
+                        "surface-container-lowest": "#0d0d15",
+                        "surface-bright": "#393841",
+                        "surface-dim": "#13131b",
+                        "surface-tint": "#c0c1ff",
+                        "primary": "#c0c1ff",
+                        "surface-container-low": "#1b1b23",
+                        "surface-container-high": "#292932",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "on-primary-fixed": "#07006c",
+                        "on-primary": "#1000a9",
+                        "surface-container": "#1f1f27",
+                        "outline": "#908fa0",
+                        "primary-fixed": "#e1e0ff",
+                        "background": "#13131b",
+                        "on-error": "#690005",
+                        "secondary": "#4cd7f6",
+                        "on-background": "#e4e1ed",
+                        "inverse-surface": "#e4e1ed",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-secondary-container": "#00424e",
+                        "error": "#ffb4ab",
+                        "surface-container-highest": "#34343d",
+                        "on-secondary-fixed": "#001f26",
+                        "error-container": "#93000a",
+                        "on-secondary": "#003640",
+                        "inverse-on-surface": "#303038",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "surface": "#13131b",
+                        "on-surface": "#e4e1ed",
+                        "outline-variant": "#464554",
+                        "on-primary-container": "#0d0096"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "12px",
+                        "cell-padding": "20px",
+                        "stack-compact": "8px",
+                        "margin-container": "24px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Geist"],
+                        "label-mono": ["JetBrains Mono"],
+                        "headline-md": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "body-base": ["Geist"],
+                        "headline-md-mobile": ["Geist"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["12px", { "lineHeight": "1.5", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "label-mono": ["11px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "body-base": ["14px", { "lineHeight": "1.6", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "headline-md-mobile": ["20px", { "lineHeight": "1.2", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(23, 23, 23, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .saas-glow {
+            background: radial-gradient(circle at 50% -20%, rgba(192, 193, 255, 0.15) 0%, rgba(19, 19, 27, 0) 60%);
+        }
+
+        .primary-gradient-btn {
+            background: linear-gradient(135deg, #494bd6 0%, #03b5d3 100%);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .primary-gradient-btn:hover {
+            box-shadow: 0 0 20px rgba(73, 75, 214, 0.4);
+            transform: scale(1.02);
+        }
+
+        .primary-gradient-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+    <style>
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        #animation-viewport {
+            will-change: transform, opacity;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-surface font-body-base antialiased">
+    <!-- TopNavBar -->
+    <nav class="fixed top-0 w-full bg-background/70 backdrop-blur-xl border-b border-white/10 z-50">
+        <div class="flex justify-between items-center px-margin-container h-16 w-full max-w-7xl mx-auto">
+            <div class="font-headline-md text-headline-md font-bold text-on-surface tracking-tight">UnifiedExplorer
+            </div>
+            <div class="hidden md:flex gap-8 items-center">
+                <a class="text-primary font-bold border-b-2 border-primary pb-1 font-body-base text-body-base"
+                    href="#">Features</a>
+            </div>
+            <div class="w-24 md:w-32"></div> <!-- Spacer for balance -->
+        </div>
+    </nav>
+    <!-- Hero Section -->
+    <section class="relative h-[400vh] w-full saas-glow" id="hero-scroll-container">
+        <div class="sticky top-0 h-screen w-full flex flex-col items-center justify-start pt-32 overflow-hidden">
+            <!-- Hero Text Content -->
+            <div class="max-w-7xl mx-auto text-center relative z-40 mb-12 px-margin-container">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6">
+                    <span class="font-label-mono text-label-mono text-secondary uppercase tracking-widest">v2.4.0 Engine
+                        Active</span>
+                </div>
+                <h1
+                    class="font-display-lg text-display-lg max-w-4xl mx-auto mb-6 bg-gradient-to-b from-on-surface to-on-surface-variant bg-clip-text text-transparent">
+                    The End of Cluttered File Management.
+                </h1>
+                <p
+                    class="font-body-base text-body-base text-on-surface-variant max-w-2xl mx-auto mb-10 leading-relaxed">
+                    Experience expensive efficiency through a clinical interface designed for high-density deep work.
+                    Built-in performance that redefines your local workspace.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <a class="primary-gradient-btn px-8 py-4 rounded-xl text-white font-bold text-headline-md flex items-center gap-2 w-full sm:w-auto"
+                        href="https://github.com/mommel/UnifiedExplorer/releases/">
+                        Get Latest Release
+                        <span class="material-symbols-outlined">download</span>
+                    </a>
+                    <button
+                        class="px-8 py-4 rounded-xl border border-white/15 bg-transparent hover:bg-white/10 transition-all font-bold text-headline-md w-full sm:w-auto">
+                        View Documentation
+                    </button>
+                </div>
+            </div>
+            <!-- Animated Image Layers -->
+            <div class="relative w-full max-w-5xl h-[50vh] perspective-1000" id="animation-viewport">
+                <!-- Image 1: Logo -->
+                <div class="img-layer absolute inset-0 flex items-center justify-center opacity-100 transform-gpu transition-all duration-75 pointer-events-none"
+                    data-end="0.33" data-start="0">
+                    <img alt="UnifiedExplorer Logo" class="w-full max-w-2xl h-auto object-contain"
+                        src="./assets/logo.jpg" />
+                </div>
+                <!-- Image 2: Light Mode -->
+                <div class="img-layer absolute inset-0 flex items-center justify-center opacity-0 transform-gpu scale-50 transition-all duration-75 pointer-events-none shadow-2xl"
+                    data-end="0.66" data-start="0.33">
+                    <img alt="UnifiedExplorer Light Mode"
+                        class="w-full h-auto max-w-4xl object-contain rounded-xl border border-white/10"
+                        src="./assets/lightmode.png" />
+                </div>
+                <!-- Image 3: Dark Mode -->
+                <div class="img-layer absolute inset-0 flex items-center justify-center opacity-0 transform-gpu scale-50 transition-all duration-75 pointer-events-none shadow-2xl"
+                    data-end="1.0" data-start="0.66">
+                    <img alt="UnifiedExplorer Dark Mode"
+                        class="w-full h-auto max-w-4xl object-contain rounded-xl border border-white/10"
+                        src="./assets/darkmode.png" />
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Features Section -->
+    <section class="py-20 px-margin-container max-w-7xl mx-auto">
+        <div class="mb-12">
+            <h2 class="font-label-mono text-label-mono text-primary uppercase mb-2">Core Competencies</h2>
+            <h3 class="font-headline-md text-headline-md">Engineered Precision</h3>
+        </div>
+        <div class="w-full">
+            <div class="glass-card rounded-xl p-12 text-center relative overflow-hidden group">
+                <div
+                    class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                </div>
+                <p class="text-headline-md font-medium text-on-surface relative z-10">
+                    Aim is the built-in FileExplorer but without that sorting insanity.
+                </p>
+                <div class="mt-8 flex justify-center gap-4 text-on-surface-variant opacity-60">
+                    <span class="material-symbols-outlined" data-icon="folder_zip">folder_zip</span>
+                    <span class="material-symbols-outlined" data-icon="speed">speed</span>
+                    <span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Visual Divider -->
+    <div class="max-w-7xl mx-auto px-margin-container">
+        <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+    </div>
+    <!-- Integration CTA -->
+    <section class="py-24 px-margin-container text-center max-w-7xl mx-auto">
+        <div class="glass-card rounded-3xl p-12 relative overflow-hidden">
+            <div class="absolute inset-0 saas-glow pointer-events-none opacity-40"></div>
+            <h2 class="font-display-lg text-display-lg mb-6 relative z-10">Ready for elite-tier order?</h2>
+            <p class="font-body-base text-body-base text-on-surface-variant mb-8 max-w-2xl mx-auto relative z-10">
+                Join the private beta. Engineering the future of local and cloud storage management for founders and
+                lead architects.
+            </p>
+            <div class="relative z-10">
+                <a class="primary-gradient-btn px-10 py-5 rounded-xl text-white font-bold text-headline-md inline-flex items-center gap-3"
+                    href="https://github.com/mommel/UnifiedExplorer/releases/">
+                    Download UnifiedExplorer
+                    <span class="material-symbols-outlined" data-icon="rocket_launch">rocket_launch</span>
+                </a>
+            </div>
+        </div>
+    </section>
+    <!-- Footer -->
+    <footer class="bg-surface-container-lowest w-full py-12 border-t border-white/5">
+        <div
+            class="flex flex-col md:flex-row justify-between items-center px-margin-container w-full max-w-7xl mx-auto gap-gutter">
+            <div class="flex flex-col gap-2">
+                <div class="font-headline-md text-headline-md text-on-surface font-bold">UnifiedExplorer</div>
+                <p class="font-label-mono text-label-mono text-on-surface-variant">© 2024 UnifiedExplorer. Engineering
+                    the future of local storage.</p>
+            </div>
+            <div class="flex gap-8">
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-secondary transition-colors"
+                    href="#">Documentation</a>
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-secondary transition-colors"
+                    href="#">Privacy</a>
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-secondary transition-colors"
+                    href="#">Changelog</a>
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-secondary transition-colors"
+                    href="#">X (Twitter)</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+        window.addEventListener('scroll', () => {
+            const container = document.getElementById('hero-scroll-container');
+            if (!container) return;
+
+            const layers = document.querySelectorAll('.img-layer');
+            const containerTop = container.offsetTop;
+            const containerHeight = container.offsetHeight - window.innerHeight;
+            const scrollY = window.scrollY - containerTop;
+
+            // Calculate normalized scroll (0 to 1) for the sticky duration
+            const rawProgress = scrollY / containerHeight;
+            const progress = Math.min(Math.max(rawProgress, 0), 1);
+
+            layers.forEach(layer => {
+                const start = parseFloat(layer.dataset.start);
+                const end = parseFloat(layer.dataset.end);
+
+                // Calculate local progress for this specific layer's window
+                let localProgress = (progress - start) / (end - start);
+                localProgress = Math.min(Math.max(localProgress, 0), 1);
+
+                // Animation logic: 
+                // 0: Small/Hidden -> 0.5: Full Size/Visible -> 1.0: Huge/Fade Out
+                let scale = 0.8 + (localProgress * 10); // Rapidly scale up to 10.8x for 'falling' effect
+                let opacity = 0;
+
+                if (localProgress > 0 && localProgress < 1) {
+                    // Fade in rapidly at the start, fade out at the end
+                    if (localProgress < 0.2) {
+                        opacity = localProgress / 0.2;
+                        scale = 0.8 + (localProgress * 1);
+                    } else if (localProgress > 0.6) {
+                        opacity = 1 - ((localProgress - 0.6) / 0.4);
+                        scale = 1 + (localProgress - 0.2) * 5;
+                    } else {
+                        opacity = 1;
+                        scale = 1 + (localProgress - 0.2) * 0.5;
+                    }
+                }
+
+                layer.style.opacity = opacity;
+                layer.style.transform = `scale(${scale})`;
+            });
+        });
+    </script>
+</body>
+
+</html>
